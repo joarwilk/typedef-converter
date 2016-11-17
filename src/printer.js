@@ -164,17 +164,21 @@ const printExport = (node) => {
 }
 
 const printBasicFunction = (func, dotAsReturn=false) => {
-  const params = func.parameters.map(printParameter).join(',\n\t');
+  const params = func.parameters.map(printParameter).join(', ');
   const generics = printGenerics(func.typeParameters);
   const returns = printType(func.type);
 
-  // If the function has params, break them onto a new
-  // line for better formatting
-  const paramsWithNewlines = `\n\t${params}\n`;
+  const firstPass = `${generics}(${params})${dotAsReturn ? ':' : ' =>'} ${returns}`;
 
-  const formattedParams = func.parameters.length > 1 && dotAsReturn ? paramsWithNewlines : params;
+  // Make sure our functions arent too wide
+  if (firstPass.length > 80) {
+    // break params onto a new line for better formatting
+    const paramsWithNewlines = `\n\t\t${params}\n\t`;
 
-  return `${generics}(${formattedParams})${dotAsReturn ? ':' : ' =>'} ${returns}`;
+    return `${generics}(${paramsWithNewlines})${dotAsReturn ? ':' : ' =>'} ${returns}`;
+  }
+
+  return firstPass;
 }
 
 const printFunction = (func) => {
@@ -184,9 +188,9 @@ const printFunction = (func) => {
 }
 
 const printBasicInterface = (interf, withSemicolons=false) => {
-  const members = interf.members.map(printType).filter(Boolean).join(withSemicolons ? ';\n\t' : ',\n\t');
+  const members = interf.members.map(printType).filter(Boolean).join(withSemicolons ? ';\n\t\t' : ',\n\t\t');
 
-  return `{\n\t${members}\n}`;
+  return `{\n\t\t${members}\n\t}`;
 }
 
 const printInterface = (node) => {
@@ -238,14 +242,14 @@ const printImports = (nodes) => {
 }
 
 const finalPrint = ({ imports, modules }) => {
-  let str = modules.filter(module => module.name !== 'rodot').map(module => (`
-    declare module '${module.name}' {
-      ${module.types.length ? module.types.map(printTypeAlias).join('\n\n') : ''}
-      ${module.interfaces.length ? module.interfaces.map(printInterface).join('\n\n') : ''}
-      ${module.functions.length ? module.functions.map(printFunction).join('\n\n') : ''}
-      ${module.classes.length ? module.classes.map(printClass).join('\n\n') : ''}
-      ${module.exports.length ? module.exports.map(printExports).join('\n\n') : ''}
-    }`
+  let str = modules.filter(module => module.name !== 'rodpot').map(module => ('' +
+    `declare module '${module.name}' {\n`+
+      '\t' + (module.types.length ? module.types.map(printTypeAlias).join('\n\n\t') + '\n\n' : '') +
+      '\t' + (module.interfaces.length ? module.interfaces.map(printInterface).join('\n\n\t') + '\n\n' : '') +
+      '\t' + (module.functions.length ? module.functions.map(printFunction).join('\n\n\t') + '\n\n' : '') +
+      '\t' + (module.classes.length ? module.classes.map(printClass).join('\n\n\t') + '\n\n' : '') +
+      '\t' + (module.exports.length ? module.exports.map(printExports).join('\n\n\t') + '\n\n' : '') +
+    '\n}'
   )).join('\n\n');
 
   return printImports(imports) + '\n\n' + str;

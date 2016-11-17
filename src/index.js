@@ -161,7 +161,7 @@ let sourceFile = ts.createSourceFile('test.d.ts', readFileSync('test.d.ts').toSt
 recursiveWalkTree(sourceFile);
 
 var fs = require('fs');
-fs.writeFile("./out.flow.js", js_beautify(printer(tree.exportFormatted())), function(err) {
+fs.writeFile("./out.flow.js", (printer(tree.exportFormatted())), function(err) {
     if(err) {
         return console.log(err);
     }

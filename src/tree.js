@@ -20,7 +20,6 @@ const createNodeReference = (node, context, kind) => {
 }
 
 const getFullNodeById = (id: string) => {
-    console.log(id);
     if (!nodes[id]) {
         throw new Error('Trying to reference invalid node', id);
     }
@@ -45,8 +44,6 @@ const namespaceNameToModuleName = (namespace: string) => {
 // TODO: Stop mutating the tree
 const resolveVariableReferences = () => {
     _.forEach(tree.modules, (node, context) => {
-        console.log('Entering context', context)
-
         node.variables.forEach(id => {
             const variable = getFullNodeById(id);
 
@@ -179,9 +176,6 @@ export default {
     pushFunction,
     pushExport,
     pushNamespace,
-    debug: () => {
-        console.log(exportFormatted());
-    },
 
     // Where the magic happens
     exportFormatted

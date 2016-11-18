@@ -83,6 +83,7 @@ const collectVariableFromNode = (node, context) => {
 }
 
 const markNodeForExporting = (node, context) => {
+  //console.log('export', node)
   /*tree.pushExport({
     name: node.name.text ? node.name.text : node.name,
     type: node.kind,
@@ -122,7 +123,7 @@ const stripDetailsFromTree = (root) => {
 }
 
 // Walk the AST and extract all the definitions we care about
-const recursiveWalkTree = (ast, context = 'root') => {
+export const recursiveWalkTree = (ast, context = 'root') => {
   ast.statements.forEach(node => {
     switch (node.kind) {
       case ts.SyntaxKind.ModuleDeclaration:
@@ -155,16 +156,3 @@ const recursiveWalkTree = (ast, context = 'root') => {
     }
   })
 }
-
-let sourceFile = ts.createSourceFile('test.d.ts', readFileSync('test.d.ts').toString(), ts.ScriptTarget.ES6, /*setParentNodes */ true);
-
-recursiveWalkTree(sourceFile);
-
-var fs = require('fs');
-fs.writeFile("./out.flow.js", (printer(tree.exportFormatted())), function(err) {
-    if(err) {
-        return console.log(err);
-    }
-
-    console.log("The file was saved!");
-});

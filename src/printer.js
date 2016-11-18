@@ -1,6 +1,6 @@
 /* @flow */
-import getNodeName from './nodeName.js';
-import _ from 'lodash'
+import _ from 'lodash';
+import getNodeName from './nodeName';
 
 const Types = {
   VoidKeyword: 'void',
@@ -15,101 +15,95 @@ const printType = (type) => {
     return Types[type.kind];
   }
 
-  else if (type.kind == "FunctionTypeAnnotation") {
-    return printBasicFunction(type);
-  }
+  else {
+    switch (type.kind) {
+      case "FunctionType":
+      case "FunctionTypeAnnotation":
+        return printBasicFunction(type);
 
-  else if (type.kind == "FunctionType") {
-    return printBasicFunction(type);
-  }
+      case "TypeLiteral":
+        return printBasicInterface(type);
+      
+      case 'Identifier':
+      case 'StringLiteralType':
+        return type.text;
 
-  else if (type.kind == "TypeLiteral") {
-    return printBasicInterface(type);
-  }
+      case 'TypePredicate':
+      case 'BindingElement':
+      case 'TypeParameter':
+        return type.name.text;
 
-  else if (type.kind === 'StringLiteralType') {
-    return type.text;
-  }
+      case 'QualifiedName':
+        return printType(type.left) + '.' + printType(type.right) + printGenerics(type.typeArguments);
 
-  else if (type.kind === 'QualifiedName') {
-    return printType(type.left) + '.' + printType(type.right) + printGenerics(type.typeArguments)
-  }
+      case 'TypeReference':
+        return parseTypeReference(type);
 
-  else if (type.kind === 'TypeReference') {
-    return parseTypeReference(type);
-  }
+      case 'LastNodeType':
+        return `"${type.literal.text}"`;
 
-  else if (type.kind === 'PropertySignature') {
-    return printParameter(type)
-  }
+      case 'PropertyDeclaration':
+        if (type.modifiers && type.modifiers.some(modifier => modifier.kind === 'PrivateKeyword')) {
+          return '';
+        }
 
-  else if (type.kind === 'PropertyDeclaration') {
-    if (type.modifiers && type.modifiers.some(modifier => modifier.kind === 'PrivateKeyword')) {
-      return '';
+        if (type.parameters) {
+          return type.name.text + ': ' + type.parameters.map(printParameter);
+        }
+
+        if (type.type) {
+          return type.name.text + ': ' + printType(type.type)
+
+        }
+
+        return type.name.text + ': ';
+
+      case 'TupleType':
+        return `[${type.elementTypes.map(printType).join(', ')}]`
+
+      
+      case 'MethodSignature':
+        return `${type.name.text}${printBasicFunction(type, true)}`
+
+      case 'ExpressionWithTypeArguments':
+        return printType(type.expression) + printGenerics(type.typeArguments);
+        
+      case 'PropertyAccessExpression':
+        return `${type.expression.text}$${type.name.text}`;
+
+      case 'PropertySignature':
+        return printParameter(type)
+
+      case 'CallSignature':
+        return `(${type.name ? type.name : ''}): ${printType(type.type)}`
+
+      case 'UnionType':
+        return type.types.map(printType).join(' | ');
+
+      case 'ArrayType':
+        return printType(type.elementType) + '[]';
+
+      case 'IndexSignature':
+        return `[${type.parameters.map(printParameter).join(', ')}]: ${printType(type.type)}`
+
+      case 'IntersectionType':
+        return type.types.map(printType).join(' & ')
+
+      case 'MethodDeclaration':
+        return type.name.text + printBasicFunction(type, true);
+      
+      case 'ConstructSignature':
+        return 'new ' + printBasicFunction(type, true);
+
+      case 'TypeQuery':
+        return 'typeof ' + type.exprName.text;
+
+      case 'Constructor':
+        return 'constructor(' + type.parameters.map(printParameter).join(', ') + '): this';
+
+      case 'ParenthesizedType':
+        return `(${printType(type.type)})`;
     }
-
-    if (type.parameters) {
-      return type.name.text + ': ' + type.parameters.map(printParameter);
-    }
-
-    if (type.type) {
-      return type.name.text + ': ' + printType(type.type)
-
-    }
-
-    return type.name.text + ': '
-  }
-
-  else if (type.kind === 'CallSignature') {
-    return `(${type.name}): ${printType(type.type)}`
-  }
-
-  else if (type.kind === 'UnionType') {
-    return type.types.map(printType).join(' | ');
-  }
-
-  else if (type.kind === 'ArrayType') {
-    return printType(type.elementType) + '[]';
-  }
-
-  else if (type.kind === 'IndexSignature') {
-    return `[${type.parameters.map(printParameter).join(', ')}]: ${printType(type.type)}`
-  }
-
-  else if (type.kind === 'IntersectionType') {
-    return type.types.map(printType).join(' & ')
-  }
-
-  else if (type.kind === 'MethodDeclaration') {
-    return type.name.text + printBasicFunction(type, true);
-  }
-
-  else if (type.kind === 'Constructor') {
-    return 'constructor(' + type.parameters.map(printParameter).join(', ') + '): this';
-  }
-
-  else if (type.kind === 'BindingElement') {
-    return type.name.text;
-  }
-
-  else if (type.kind === 'TypeParameter') {
-    return type.name.text;
-  }
-
-  else if (type.kind === 'Identifier') {
-    return type.text;
-  }
-
-  else if (type.kind === 'ParenthesizedType') {
-    return `(${printType(type.type)})`
-  }
-
-  else if (type.kind === 'MethodSignature') {
-    return `${type.name.text}${printBasicFunction(type, true)}`
-  }
-
-  else if (type.kind === 'TypePredicate') {
-    return type.text;
   }
 
   console.log('NO PRINT IMPLEMENTED', type)
@@ -206,17 +200,22 @@ const printTypeAlias = (node) => {
 }
 
 const printClass = (node) => {
-  return printDeclaration(node, 'class', printBasicInterface.bind(null, node, true))
-}
+  const heritage = node.heritageClauses.map(clause => printType(clause.types[0])).join(', ');
+  const heritageStr = heritage.length > 0 ? `extends ${heritage}` : '';
 
-const printDeclaration = (node, keyword, printer) => {
-    let str = `declare ${printExport(node)}${keyword} ${node.name.text}${printGenerics(node.typeParameters)} ${printer()}`;
+  let str = `declare ${printExport(node)}class ${node.name.text}${printGenerics(node.typeParameters)} ${heritageStr} ${printBasicInterface(node, true)}`;
 
-    return str;
+  return str;
 }
 
 const printExports = (node) => {
-  return `export ${node.isDefault ? 'default ' : ''}${node.name}`;
+  if (node.isDefault) {
+    return `declare module.exports: ${node.name}`
+  }
+
+  // I dont think this case will ever happen right now
+  console.error('Encountered a non-default export to print');
+  return '';
 }
 
 const printImports = (nodes) => {

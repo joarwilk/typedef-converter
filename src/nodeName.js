@@ -165,6 +165,7 @@ export default function getNodeName(node) {
     case ts.SyntaxKind.IntersectionType: return "IntersectionType"
     case ts.SyntaxKind.ParenthesizedType: return "ParenthesizedType"
     case ts.SyntaxKind.ThisType: return "ThisType"
+    case ts.SyntaxKind.LastTypeNode: return "LastNodeType"
     case ts.SyntaxKind.StringLiteralType: return "StringLiteralType"
     case ts.SyntaxKind.ObjectBindingPattern: return "ObjectBindingPattern"
     case ts.SyntaxKind.ArrayBindingPattern: return "ArrayBindingPattern"

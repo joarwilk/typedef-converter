@@ -1,3 +1,36 @@
 # Typescript to Flow converter
 
-Please check back tomorrow for a proper readme
+This projects exists because having to write duplicate library definitions is no fun at all.
+
+## The state of the converter
+It's surprisingly robust and non-lossy as it stands right now, in big part thanks to how similar flow and typescript definition files are.
+I've ran it against the [typescript definition for yargs](https://github.com/flowtype/flow-typed/blob/master/definitions/npm/yargs_v4.x.x/flow_v0.23.x-/yargs_v4.x.x.js) and it converted it to a flow library definition that worked out of the box.
+
+## The difficult parts
+
+### Namespaces
+Namespaces have been a big headache. What it does right now is that it converts any namespace to a module  
+and then imports any references to that module. What's currently not working in terms of namespaces is exporting all
+properties of the namespace as a default object, but that should be a fairly trivial change.
+
+### External library imports
+Definitions in TS and flow are often quite different, and imported types from other libraries dont usually have
+a one-to-one mapping. As an example, libraries using `React.Component<>` are difficult to translate to flow.
+
+### Odd TS conventions
+[Lodash](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/lodash/lodash.d.ts) has been one of the reference libraries i've worked with when creating the 
+converter, however I'm honestly surprised the TS definitin works at all. It's just a series of repeated interfaces
+with the same name, which breaks when converted to flow. If anyone knows how to make sense of the lodash definition, [send a tweet](//twitter.com/joarwilk) or something.
+
+## Usage
+
+Standard usage (will produce `lodash.flow.js`):
+```
+yarn global add typedef-converter
+typedef-converter lodash.d.ts
+```
+
+### Options
+```
+-o / --out: Specifies the filename of the exported file
+```

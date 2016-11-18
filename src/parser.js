@@ -1,6 +1,5 @@
 /* @flow */
 import _ from 'lodash'
-import { js_beautify } from 'js-beautify'
 
 import * as ts from 'typescript';
 

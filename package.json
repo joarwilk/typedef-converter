@@ -1,6 +1,6 @@
 {
   "name": "typedef-converter",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Converts typescript definition files to flow library files",
   "main": "index.js",
   "bin": {

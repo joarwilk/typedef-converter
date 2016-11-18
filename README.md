@@ -4,7 +4,7 @@ This projects exists because having to write duplicate library definitions is no
 
 ## The state of the converter
 It's surprisingly robust and non-lossy as it stands right now, in big part thanks to how similar flow and typescript definition files are.
-I've ran it against the [typescript definition for yargs](https://github.com/flowtype/flow-typed/blob/master/definitions/npm/yargs_v4.x.x/flow_v0.23.x-/yargs_v4.x.x.js) and it converted it to a flow library definition that worked out of the box.
+I've ran it against the [typescript definition for yargs](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/yargs/yargs.d.ts) and it converted it to a flow library definition that worked out of the box.
 
 It almost works with multiple files - biggest issue right now is not inserting the proper module, instead favouring the root module which should never have properties.
 
@@ -16,7 +16,7 @@ and then imports any references to that module. What's currently not working in 
 properties of the namespace as a default object, but that should be a fairly trivial change.
 
 ### Variables
-Since variables don't exist in flow definitions, the converter has to resolve variable references manually.
+Since TS and flow variables dont match in functionality, the converter has to resolve variable references manually.
 A common case looks like this: 
 ```
 var yargs: yargs.Argv;

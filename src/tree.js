@@ -73,6 +73,10 @@ const resolveVariableReferences = () => {
     });
 }
 
+const exportRaw = () => {
+    return _.clone(tree);
+}
+
 const exportFormatted = () => {
     // Start off by solving and linking any variable references
     resolveVariableReferences();
@@ -184,5 +188,6 @@ export default {
     pushNamespace,
 
     // Where the magic happens
-    exportFormatted
+    exportFormatted,
+    exportRaw
 }

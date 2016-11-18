@@ -254,4 +254,16 @@ const finalPrint = ({ imports, modules }) => {
   return printImports(imports) + '\n\n' + str;
 }
 
+export const printSimpleTree = (tree) => {
+  let str = _.map(tree.modules, (module, name) => ('' +
+      (module.types.length ? module.types.join('\n') + '\n' : '') +
+      (module.interfaces.length ? module.interfaces.join('\n') + '\n' : '') +
+      (module.functions.length ? module.functions.join('\n') + '\n' : '') +
+      (module.classes.length ? module.classes.join('\n') + '\n' : '') +
+      (module.exports.length ? module.exports.join('\n') + '\n' : '')
+  )).join('\n');
+
+  return str;
+}
+
 export default finalPrint;

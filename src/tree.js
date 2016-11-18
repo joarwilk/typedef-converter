@@ -2,6 +2,7 @@
 import _ from 'lodash'
 const nodes = {};
 
+// A context is essentially a module
 const createContext = () => ({
     functions: [],
     classes: [],
@@ -11,6 +12,7 @@ const createContext = () => ({
     exports: []
 });
 
+// Store the node in our ref cache and return the ID
 const createNodeReference = (node, context, kind) => {
     const id = context + '/' + kind + '/' + (node.name.text ? node.name.text : node.name);
 
@@ -19,6 +21,7 @@ const createNodeReference = (node, context, kind) => {
     return id;
 }
 
+// Get a node from the ref cache
 const getFullNodeById = (id: string) => {
     if (!nodes[id]) {
         throw new Error('Trying to reference invalid node', id);
@@ -43,6 +46,7 @@ const namespaceNameToModuleName = (namespace: string) => {
 // Look up what all collected variables are referring to
 // TODO: Stop mutating the tree
 const resolveVariableReferences = () => {
+    // Iterate all the modules in the tree
     _.forEach(tree.modules, (node, context) => {
         node.variables.forEach(id => {
             const variable = getFullNodeById(id);
@@ -91,6 +95,7 @@ const exportFormatted = () => {
             exportDeclr.name = variable.value;
         });
 
+        // Return a basic module representation
         return {
             name: context,
             functions: node.functions.map(getFullNodeById),
@@ -108,6 +113,7 @@ const exportFormatted = () => {
     }
 }
 
+// Collect all imports and remove duplicates
 const normalizeImports = (allImports) => {
     const imports = {};
     allImports.forEach(node => {
@@ -138,7 +144,7 @@ const insertNodeIntoTree = (node, context, kind) => {
     }
 
     if (!node) {
-        throw new Error();
+        throw new Error('Trying to insert invalid node');
     }
 
     tree.modules[context][kind].push(createNodeReference(node, context, kind));

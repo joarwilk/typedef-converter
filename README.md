@@ -6,6 +6,8 @@ This projects exists because having to write duplicate library definitions is no
 It's surprisingly robust and non-lossy as it stands right now, in big part thanks to how similar flow and typescript definition files are.
 I've ran it against the [typescript definition for yargs](https://github.com/flowtype/flow-typed/blob/master/definitions/npm/yargs_v4.x.x/flow_v0.23.x-/yargs_v4.x.x.js) and it converted it to a flow library definition that worked out of the box.
 
+It almost works with multiple files - biggest issue right now is not inserting the proper module, instead favouring the root module which should never have properties.
+
 ## The difficult parts
 
 ### Namespaces

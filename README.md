@@ -13,14 +13,25 @@ Namespaces have been a big headache. What it does right now is that it converts 
 and then imports any references to that module. What's currently not working in terms of namespaces is exporting all
 properties of the namespace as a default object, but that should be a fairly trivial change.
 
+### Variables
+Since variables don't exist in flow definitions, the converter has to resolve variable references manually.
+A common case looks like this: 
+```
+var yargs: yargs.Argv;
+	export = yargs;
+```
+
+Which then resolves to `declare module.exports: Argv`.
+
 ### External library imports
 Definitions in TS and flow are often quite different, and imported types from other libraries dont usually have
-a one-to-one mapping. As an example, libraries using `React.Component<>` are difficult to translate to flow.
+a one-to-one mapping. As an example, libraries using `React.Component<>` are difficult to translate to flow. 
+This might require manual processing, or we add a set of hardcoded mutations that handle common cases.
 
 ### Odd TS conventions
 [Lodash](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/lodash/lodash.d.ts) has been one of the reference libraries i've worked with when creating the 
-converter, however I'm honestly surprised the TS definitin works at all. It's just a series of repeated interfaces
-with the same name, which breaks when converted to flow. If anyone knows how to make sense of the lodash definition, [send a tweet](//twitter.com/joarwilk) or something.
+converter. The definition is mostly just a series of interfaces with the same name being re-declared over and over again for each function, which doesn't translate to flow at all.
+If anyone knows how to make sense of the lodash definition, [send me a tweet](//twitter.com/joarwilk).
 
 ## Usage
 

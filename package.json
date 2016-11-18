@@ -11,9 +11,13 @@
     "compile": "babel ./src --out-dir lib",
     "prepublish": "npm run compile"
   },
+  "files":[
+    "index.js",
+    "lib"
+  ],
   "author": "Joar Wilk",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "babel-cli": "^6.18.0",
     "babel-core": "^6.18.2",
     "babel-plugin-syntax-async-functions": "^6.13.0",
@@ -21,9 +25,11 @@
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-0": "^6.16.0",
     "babel-watch": "^2.0.3",
+    "flow-bin": "^0.35.0"
+  },
+  "dependencies": {
     "command-line-args": "^3.0.3",
     "command-line-usage": "^3.0.7",
-    "flow-bin": "^0.35.0",
     "lodash": "^4.17.2",
     "typescript": "^2.0.10"
   }

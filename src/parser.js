@@ -19,6 +19,10 @@ const parseNameFromNode = (node, context) => {
     return node.type.typeName.text;
   }
 
+  else if (node.moduleSpecifier) {
+    return node.moduleSpecifier.text;
+  }
+
 console.log('wat', node)
 throw new Error()
 
@@ -98,6 +102,38 @@ const collectExportAssignmentFromNode = (node, context) => {
   }, context);
 }
 
+
+const collectImportFromNode = (node, context: string) => {
+    if (node.importClause.name) {
+        // Import in the style of "import React from 'react'"
+        tree.pushImport({
+            type: 'default',
+            what: node.importClause.name,
+            from: node.moduleSpecifier.text
+        })
+    }
+
+    if (node.importClause.namedBindings) {
+        if (node.importClause.namedBindings.name) {
+            // Import in the style of "import * as React from 'react'"
+            tree.pushImport({
+                type: 'default',
+                what: node.importClause.namedBindings.name.text,
+                from: node.moduleSpecifier.text
+            })
+        } else {
+            // Import in the style of "import { Component } from 'react'"
+            node.importClause.namedBindings.elements.forEach(element => {
+                tree.pushImport({
+                    type: 'explicit',
+                    what: element.name.text,
+                    from: node.moduleSpecifier.text
+                })
+            })
+        }
+    }
+}
+
 // Traverse the AST and strip information we dont care about
 // This is mostly to make debugging a bit less verbose
 const stripDetailsFromTree = (root) => {
@@ -152,6 +188,9 @@ export const recursiveWalkTree = (ast, context = 'root') => {
 
       case ts.SyntaxKind.ExportAssignment:
         collectExportAssignmentFromNode(node, context); break;
+
+      case ts.SyntaxKind.ImportDeclaration:
+        collectImportFromNode(node, context); break;
     }
   })
 }

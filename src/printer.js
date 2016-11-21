@@ -83,6 +83,9 @@ const printType = (type) => {
       case 'ArrayType':
         return printType(type.elementType) + '[]';
 
+      case 'ThisType':
+        return 'this';
+
       case 'IndexSignature':
         return `[${type.parameters.map(printParameter).join(', ')}]: ${printType(type.type)}`
 
@@ -175,8 +178,8 @@ const printBasicFunction = (func, dotAsReturn=false) => {
   return firstPass;
 }
 
-const printFunction = (func) => {
-  let str = `declare function ${func.name.text}${printBasicFunction(func, true)}`;
+const printFunction = (node) => {
+  let str = `declare ${printExport(node)}function ${node.name.text}${printBasicFunction(node, true)}`;
 
   return str;
 }
@@ -200,15 +203,20 @@ const printTypeAlias = (node) => {
 }
 
 const printClass = (node) => {
-  const heritage = node.heritageClauses.map(clause => printType(clause.types[0])).join(', ');
-  const heritageStr = heritage.length > 0 ? `extends ${heritage}` : '';
+  let heritage = '';
 
-  let str = `declare ${printExport(node)}class ${node.name.text}${printGenerics(node.typeParameters)} ${heritageStr} ${printBasicInterface(node, true)}`;
+  // If the class is extending something
+  if (node.heritageClauses) {
+    heritage = node.heritageClauses.map(clause => printType(clause.types[0])).join(', ');
+    heritage = heritage.length > 0 ? `extends ${heritage}` : '';
+  }
+
+  let str = `declare ${printExport(node)}class ${node.name.text}${printGenerics(node.typeParameters)} ${heritage} ${printBasicInterface(node, true)}`;
 
   return str;
 }
 
-const printExports = (node) => {
+const printModuleExports = (node) => {
   if (node.isDefault) {
     return `declare module.exports: ${node.name}`
   }
@@ -221,7 +229,7 @@ const printExports = (node) => {
 const printImports = (nodes) => {
   return _.map(nodes, (node, module) => { 
     let str = 'import type ';
-
+    console.log(node);
     if (node.default) {
       str += node.default;
 
@@ -247,7 +255,7 @@ const finalPrint = ({ imports, modules }) => {
       '\t' + (module.interfaces.length ? module.interfaces.map(printInterface).join('\n\n\t') + '\n\n' : '') +
       '\t' + (module.functions.length ? module.functions.map(printFunction).join('\n\n\t') + '\n\n' : '') +
       '\t' + (module.classes.length ? module.classes.map(printClass).join('\n\n\t') + '\n\n' : '') +
-      '\t' + (module.exports.length ? module.exports.map(printExports).join('\n\n\t') + '\n\n' : '') +
+      '\t' + (module.exports.length ? module.exports.map(printModuleExports).join('\n\n\t') + '\n\n' : '') +
     '\n}'
   )).join('\n\n');
 
@@ -263,7 +271,8 @@ export const printSimpleTree = (tree) => {
       (module.exports.length ? module.exports.join('\n') + '\n' : '')
   )).join('\n');
 
-  return str;
+  console.log(tree.imports);
+  return printImports(tree.imports) + '\n\n' + str;
 }
 
 export default finalPrint;

@@ -9,6 +9,7 @@ const createContext = () => ({
     types: [],
     variables: [],
     interfaces: [],
+    imports: [],
     exports: []
 });
 
@@ -24,7 +25,8 @@ const createNodeReference = (node, context, kind) => {
 // Get a node from the ref cache
 const getFullNodeById = (id: string) => {
     if (!nodes[id]) {
-        throw new Error('Trying to reference invalid node', id);
+        console.error('Trying to reference invalid node: ' + id);
+        return null;
     }
 
     return nodes[id];
@@ -85,6 +87,10 @@ const exportFormatted = () => {
         node.exports.forEach(id => {
             // Get the full export object
             const exportDeclr = getFullNodeById(id);
+
+            if (!exportDeclr) {
+                return;
+            }
             
             let variable;
             try {
@@ -94,7 +100,11 @@ const exportFormatted = () => {
                 // Look in the root context for this variable
                 variable = getFullNodeById('root/variables/' + exportDeclr.name)
             }
-            
+
+            if (!variable) {
+                return;
+            }
+
             // Set the export to the value of the variable its pointing to
             exportDeclr.name = variable.value;
         });
@@ -178,6 +188,10 @@ const pushExport = (node, context: string) => {
     insertNodeIntoTree(node, context, 'exports');
 }
 
+const pushImport = (node, context: string) => {
+    tree.imports.push(node);
+}
+
 export default {
     pushClass,
     pushType,
@@ -185,6 +199,7 @@ export default {
     pushInterface,
     pushFunction,
     pushExport,
+    pushImport,
     pushNamespace,
 
     // Where the magic happens

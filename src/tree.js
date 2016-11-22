@@ -15,7 +15,17 @@ const createContext = () => ({
 
 // Store the node in our ref cache and return the ID
 const createNodeReference = (node, context, kind) => {
-    const id = Math.random() + context + '/' + kind + '/' + (node.name.text ? node.name.text : node.name);
+    if (!node.name) {
+        console.error('Encountered node without a name')
+        return 0;
+    }
+
+    let id = context + '/' + kind + '/' + (node.name.text ? node.name.text : node.name);
+
+    // Everything except variables can be overloaded, so we add a unique number to each entry
+    if (kind !== 'variables') {
+        id += '#' + Object.keys(nodes).length;
+    }
 
     nodes[id] = node;
 
@@ -26,7 +36,7 @@ const createNodeReference = (node, context, kind) => {
 const getFullNodeById = (id: string) => {
     if (!nodes[id]) {
         console.error('Trying to reference invalid node: ' + id);
-        return null;
+        return {};
     }
 
     return nodes[id];

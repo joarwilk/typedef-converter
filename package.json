@@ -4,15 +4,14 @@
   "description": "Converts typescript definition files to flow library files",
   "main": "index.js",
   "bin": {
-    "typedef-converter": "./index.js"
+    "typedef-converter": "./lib/index.js"
   },
   "scripts": {
-    "dev": "babel-watch -w ./src index.js",
+    "dev": "babel-watch -w ./src ./src/index.js",
     "compile": "babel ./src --out-dir lib",
     "prepublish": "npm run compile"
   },
   "files": [
-    "index.js",
     "lib"
   ],
   "author": "Joar Wilk",

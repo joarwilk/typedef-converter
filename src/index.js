@@ -9,9 +9,9 @@ const { readFileSync } = require("fs");
 
 const program = require('commander');
 
-const parser = require('./lib/parser');
-const { default: printer, printSimpleTree } = require('./lib/printer');
-const tree = require('./lib/tree').default;
+const parser = require('./parser');
+const { default: printer, printSimpleTree } = require('./printer');
+const tree = require('./tree').default;
 
 program
   .version('0.1.3')

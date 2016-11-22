@@ -104,34 +104,43 @@ const collectExportAssignmentFromNode = (node, context) => {
 
 
 const collectImportFromNode = (node, context: string) => {
-    if (node.importClause.name) {
-        // Import in the style of "import React from 'react'"
-        tree.pushImport({
-            type: 'default',
-            what: node.importClause.name,
-            from: node.moduleSpecifier.text
-        })
-    }
+  // Import in the style of "import 'whatwg-fetch'"
+  if (!node.importClause) {
+    tree.pushImport({
+      type: 'default',
+      what: 'npm$import$' + Math.round(Math.random() * 1000),
+      from: node.moduleSpecifier.text
+    })
+  }
 
-    if (node.importClause.namedBindings) {
-        if (node.importClause.namedBindings.name) {
-            // Import in the style of "import * as React from 'react'"
-            tree.pushImport({
-                type: 'default',
-                what: node.importClause.namedBindings.name.text,
-                from: node.moduleSpecifier.text
-            })
-        } else {
-            // Import in the style of "import { Component } from 'react'"
-            node.importClause.namedBindings.elements.forEach(element => {
-                tree.pushImport({
-                    type: 'explicit',
-                    what: element.name.text,
-                    from: node.moduleSpecifier.text
-                })
-            })
-        }
-    }
+  else if (node.importClause.name) {
+      // Import in the style of "import React from 'react'"
+      tree.pushImport({
+          type: 'default',
+          what: node.importClause.name,
+          from: node.moduleSpecifier.text
+      })
+  }
+
+  else if (node.importClause.namedBindings) {
+      if (node.importClause.namedBindings.name) {
+          // Import in the style of "import * as React from 'react'"
+          tree.pushImport({
+              type: 'default',
+              what: node.importClause.namedBindings.name.text,
+              from: node.moduleSpecifier.text
+          })
+      } else {
+          // Import in the style of "import { Component } from 'react'"
+          node.importClause.namedBindings.elements.forEach(element => {
+              tree.pushImport({
+                  type: 'explicit',
+                  what: element.name.text,
+                  from: node.moduleSpecifier.text
+              })
+          })
+      }
+  }
 }
 
 // Traverse the AST and strip information we dont care about

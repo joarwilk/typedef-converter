@@ -94,6 +94,11 @@ const printType = (type) => {
         return type.types.map(printType).join(' & ')
 
       case 'MethodDeclaration':
+        // Skip methods marked as private
+        if (type.modifiers && type.modifiers.some(modifier => modifier.kind === 'PrivateKeyword')) {
+          return '';
+        }
+
         return type.name.text + printBasicFunction(type, true);
       
       case 'ConstructSignature':
@@ -129,12 +134,17 @@ const printGenerics = (types) => (
 
 const printParameter = (param) => {
   let left = param.name.text;
+  let right;
 
   if (param.name.kind === "ObjectBindingPattern") {
     left = `{${param.name.elements.map(printType).join(', ')}}`
   }
 
-  let right = printType(param.type)
+  if (!param.type) {
+    right = "<<UNKNOWN PARAM FORMAT>>";
+  } else {
+    right = printType(param.type);
+  }
 
   if (param.questionToken) {
     left += '?';
@@ -272,8 +282,7 @@ export const printSimpleTree = (tree) => {
       (module.exports.length ? module.exports.join('\n') + '\n' : '')
   )).join('\n');
 
-  console.log(tree.imports);
-  return printImports(tree.imports) + '\n\n' + str;
+  return str;
 }
 
 export default finalPrint;

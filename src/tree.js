@@ -15,7 +15,7 @@ const createContext = () => ({
 
 // Store the node in our ref cache and return the ID
 const createNodeReference = (node, context, kind) => {
-    const id = context + '/' + kind + '/' + (node.name.text ? node.name.text : node.name);
+    const id = Math.random() + context + '/' + kind + '/' + (node.name.text ? node.name.text : node.name);
 
     nodes[id] = node;
 

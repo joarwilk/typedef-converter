@@ -28,10 +28,11 @@ const printType = (type) => {
       case 'StringLiteralType':
         return type.text;
 
-      case 'TypePredicate':
       case 'BindingElement':
       case 'TypeParameter':
         return type.name.text;
+      case 'TypePredicate':
+        return type.type.typeName.text;
 
       case 'QualifiedName':
         return printType(type.left) + '.' + printType(type.right) + printGenerics(type.typeArguments);
@@ -75,7 +76,7 @@ const printType = (type) => {
         return printParameter(type)
 
       case 'CallSignature':
-        return `(${type.name ? type.name : ''}): ${printType(type.type)}`
+        return `(${type.parameters.map(printParameter).join(', ')}): ${printType(type.type)}`
 
       case 'UnionType':
         return type.types.map(printType).join(' | ');
@@ -229,7 +230,7 @@ const printModuleExports = (node) => {
 const printImports = (nodes) => {
   return _.map(nodes, (node, module) => { 
     let str = 'import type ';
-    console.log(node);
+
     if (node.default) {
       str += node.default;
 

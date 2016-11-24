@@ -2,6 +2,8 @@
 
 This projects exists because having to write duplicate library definitions is no fun at all.
 
+### _Please note: The converter is in a very early/experimental phase_
+
 ## The state of the converter
 It's surprisingly robust and non-lossy as it stands right now, in big part thanks to how similar flow and typescript definition files are.
 I've ran it against the [typescript definition for yargs](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/yargs/yargs.d.ts) and it converted it to a flow library definition that worked out of the box.
